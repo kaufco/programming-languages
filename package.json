@@ -1,0 +1,58 @@
+{
+  "name": "programming-languages",
+  "version": "1.2.0",
+  "description": "Vergleichende Übersicht über Programmiersprachen und ihre Features",
+  "private": true,
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "start": "npm run start:dev",
+    "start:de": "cd de && docusaurus start --port 3001 --no-open",
+    "start:en": "cd en && docusaurus start --port 3002 --no-open",
+    "start:both": "npm-run-all --parallel start:de start:en",
+    "start:dev": "npm-run-all --parallel start:de start:en start:proxy",
+    "start:proxy": "node dev-proxy.js",
+    "build": "npm run build:en && npm run build:de",
+    "build:de": "cd de && docusaurus build --out-dir ../build/de",
+    "build:en": "cd en && docusaurus build --out-dir ../build",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "npm run build && docusaurus deploy",
+    "clear": "npm run clear:de && npm run clear:en",
+    "clear:de": "cd de && docusaurus clear",
+    "clear:en": "cd en && docusaurus clear",
+    "serve": "docusaurus serve",
+    "write-translations": "docusaurus write-translations",
+    "write-heading-ids": "docusaurus write-heading-ids"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.9.2",
+    "@docusaurus/module-type-aliases": "^3.9.2",
+    "@docusaurus/preset-classic": "^3.9.2",
+    "@docusaurus/theme-mermaid": "^3.9.2",
+    "@easyops-cn/docusaurus-search-local": "^0.55.0",
+    "prism-react-renderer": "^2.4.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@docusaurus/types": "^3.9.2",
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.6.3"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 3 chrome version",
+      "last 3 firefox version",
+      "last 3 safari version"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0"
+  }
+}

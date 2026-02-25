@@ -1,0 +1,186 @@
+.filteredTabs {
+  margin: 1rem 0;
+}
+
+.tabList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--ifm-color-emphasis-300);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Pseudo-Element, um die letzte Zeile nicht zu strecken */
+.tabList::after {
+  content: '';
+  flex: 999 0 0;
+  min-width: 0;
+}
+
+.tab {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius) var(--ifm-global-radius) 0 0;
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-font-color-base);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-bottom: none;
+  flex: 1 0 auto;
+  text-align: center;
+}
+
+.tab:hover:not(:disabled) {
+  background: var(--ifm-color-emphasis-200);
+}
+
+/* ============================================================
+   GRÜN – Voll unterstützt
+   ============================================================ */
+.tabGreen {
+  background: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+[data-theme='dark'] .tabGreen {
+  background: #1e4620;
+  border-color: #2d5a31;
+  color: #a3d9a3;
+}
+
+.tabGreen:hover:not(:disabled) {
+  background: #c3e6cb;
+}
+
+[data-theme='dark'] .tabGreen:hover:not(:disabled) {
+  background: #2d5a31;
+}
+
+/* ============================================================
+   GELB – Eingeschränkt unterstützt
+   ============================================================ */
+.tabYellow {
+  background: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+[data-theme='dark'] .tabYellow {
+  background: #463a10;
+  border-color: #5a4d1a;
+  color: #f0d77a;
+}
+
+.tabYellow:hover:not(:disabled) {
+  background: #ffeaa7;
+}
+
+[data-theme='dark'] .tabYellow:hover:not(:disabled) {
+  background: #5a4d1a;
+}
+
+/* ============================================================
+   ORANGE – Workaround / nicht nativ unterstützt
+   ============================================================ */
+.tabOrange {
+  background: #fde8d0;
+  border-color: #f5c99d;
+  color: #7d4e24;
+}
+
+[data-theme='dark'] .tabOrange {
+  background: #4a2e10;
+  border-color: #5a3d1a;
+  color: #f0c98a;
+}
+
+.tabOrange:hover:not(:disabled) {
+  background: #f5c99d;
+}
+
+[data-theme='dark'] .tabOrange:hover:not(:disabled) {
+  background: #5a3d1a;
+}
+
+/* ============================================================
+   ROT – Nicht unterstützt (kein Content)
+   ============================================================ */
+.tabRed {
+  background: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+[data-theme='dark'] .tabRed {
+  background: #4a1f23;
+  border-color: #5a2a2f;
+  color: #f5c6cb;
+}
+
+/* ============================================================
+   AKTIVER TAB – Basis
+   ============================================================ */
+.tabActive {
+  border-bottom: 2px solid currentColor;
+  margin-bottom: -2px;
+}
+
+/* Aktiver grüner Tab */
+.tabActiveGreen {
+  background: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+[data-theme='dark'] .tabActiveGreen {
+  background: #2d5a31;
+  border-color: #2d5a31;
+  color: #a3d9a3;
+}
+
+/* Aktiver gelber Tab */
+.tabActiveYellow {
+  background: #d4a017;
+  border-color: #d4a017;
+  color: white;
+}
+
+[data-theme='dark'] .tabActiveYellow {
+  background: #5a4d1a;
+  border-color: #5a4d1a;
+  color: #f0d77a;
+}
+
+/* Aktiver oranger Tab */
+.tabActiveOrange {
+  background: #d48a2e;
+  border-color: #d48a2e;
+  color: white;
+}
+
+[data-theme='dark'] .tabActiveOrange {
+  background: #5a3d1a;
+  border-color: #5a3d1a;
+  color: #f0c98a;
+}
+
+.tab:disabled {
+  cursor: not-allowed;
+}
+
+.tabContent {
+  margin-top: 1rem;
+}
+
+.noContentMessage {
+  padding: 1rem;
+  text-align: center;
+  color: var(--ifm-color-emphasis-600);
+  font-style: italic;
+}

@@ -1,0 +1,1297 @@
+---
+slug: /metaprogrammierung/code-generation
+title: 16.3. Code Generation
+toc_min_heading_level: 2
+toc_max_heading_level: 2
+---
+
+import Tabs from '@site/src/components/FilteredTabs';
+import TabItem from '@theme/TabItem';
+
+# 16.3. Code Generation
+
+Code generation and AST manipulation.
+
+## 16.3.1. Source Code Generation
+
+Enables programmatic generation of source code to automate repetitive code patterns or create code based on metadata or configurations.
+
+### Languages {#sprachen}
+
+<Tabs availableTabs={['csharp', 'd', 'dart', 'go', 'java', 'javascript', 'kotlin', 'prolog', 'python', 'ruby', 'rust', 'scala']}>
+<TabItem value="java" label="Java">
+
+```java
+// Required: import javax.annotation.processing.*, import javax.lang.model.element.*;
+
+@SupportedAnnotationTypes("GenerateGetter")
+@SupportedSourceVersion(SourceVersion.RELEASE_17)
+public class GetterGenerator extends AbstractProcessor {
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations, 
+                          RoundEnvironment roundEnv) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(GenerateGetter.class)) {
+            try {
+                JavaFileObject file = processingEnv.getFiler()
+                    .createSourceFile(element.getSimpleName() + "Generated");
+                try (var writer = file.openWriter()) {
+                    writer.write("public class " + element.getSimpleName() + 
+                                "Generated { /* Generated code */ }");
+                }
+            } catch (IOException e) {
+                // Handle error
+            }
+        }
+        return true;
+    }
+}
+```
+
+**Special features:**
+- Source Code Generation via Annotation Processing
+- `Filer.createSourceFile()` for code generation
+- Runs at compile time
+- Can generate complete classes
+
+**Further reading:**
+- [Oracle Java Documentation - Annotation Processing](https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/package-summary.html)
+
+</TabItem>
+<TabItem value="csharp" label="C#">
+
+```csharp
+// Required: using Microsoft.CodeAnalysis, using Microsoft.CodeAnalysis.CSharp
+
+[Generator]
+public class GetterGenerator : ISourceGenerator {
+    public void Initialize(GeneratorInitializationContext context) {
+        // Initialization
+    }
+    
+    public void Execute(GeneratorExecutionContext context) {
+        var source = @"
+namespace Generated {
+    public class GeneratedClass {
+        public void GeneratedMethod() {
+            System.Console.WriteLine(""Generated code"");
+        }
+    }
+}";
+        context.AddSource("GeneratedClass.g.cs", SourceText.From(source, Encoding.UTF8));
+    }
+}
+```
+
+**Special features:**
+- Source Code Generation via Source Generators
+- `AddSource()` for code generation
+- Runs at compile time
+- Can generate complete classes
+
+**Further reading:**
+- [Microsoft C# Documentation - Source Generators](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview)
+
+</TabItem>
+<TabItem value="kotlin" label="Kotlin">
+
+```kotlin
+// Required: import com.google.devtools.ksp.processing.*, import com.google.devtools.ksp.symbol.*
+
+class GetterGenerator : SymbolProcessor {
+    override fun process(resolver: Resolver): List<KSAnnotated> {
+        val symbols = resolver.getSymbolsWithAnnotation("GenerateGetter")
+        symbols.forEach { symbol ->
+            if (symbol is KSClassDeclaration) {
+                val file = codeGenerator.createNewFile(
+                    Dependencies(false),
+                    symbol.packageName.asString(),
+                    symbol.simpleName.asString() + "Generated"
+                )
+                file.write("class ${symbol.simpleName}Generated { /* Generated code */ }".toByteArray())
+                file.close()
+            }
+        }
+        return emptyList()
+    }
+}
+```
+
+**Special features:**
+- Source Code Generation via KSP
+- `createNewFile()` for code generation
+- Runs at compile time
+- Can generate complete classes
+
+**Further reading:**
+- [Kotlin Documentation - KSP](https://kotlinlang.org/docs/ksp-overview.html)
+
+</TabItem>
+<TabItem value="dart" label="Dart">
+
+```dart
+// Required: import 'package:json_annotation/json_annotation.dart';
+
+part 'book.g.dart';
+
+@JsonSerializable()
+class Book {
+  final String title;
+  final String author;
+  
+  Book(this.title, this.author);
+  
+  factory Book.fromJson(Map<String, dynamic> json) => _$BookFromJson(json);
+  Map<String, dynamic> toJson() => _$BookToJson(this);
+}
+```
+
+**Special features:**
+- Source Code Generation via `build_runner`
+- Code generation at compile time
+- Generated files in `.g.dart` files
+- Frequently used for serialization
+
+**Further reading:**
+- [Dart Documentation - Code Generation](https://dart.dev/guides/libraries/create-library-packages#code-generation)
+
+</TabItem>
+<TabItem value="go" label="Go">
+
+```go
+//go:generate stringer -type=Status
+
+type Status int
+
+const (
+    Pending Status = iota
+    Approved
+    Rejected
+)
+
+// Code is generated by 'go generate'
+// Generates String() method based on comment
+```
+
+**Special features:**
+- Source Code Generation via `go generate`
+- Comment-based directives
+- External tools for code generation
+- Runs before compilation
+
+**Further reading:**
+- [Go Documentation - Generate](https://pkg.go.dev/cmd/go#hdr-Generate_Go_files_by_processing_source)
+
+</TabItem>
+<TabItem value="rust" label="Rust">
+
+```rust
+// Required: use proc_macro::TokenStream, use quote::quote
+
+#[proc_macro]
+pub fn generate_struct(input: TokenStream) -> TokenStream {
+    let name = "GeneratedStruct";
+    let expanded = quote! {
+        struct #name {
+            field: i32,
+        }
+        
+        impl #name {
+            fn new() -> Self {
+                #name { field: 42 }
+            }
+        }
+    };
+    TokenStream::from(expanded)
+}
+```
+
+**Special features:**
+- Source Code Generation via Procedural Macros
+- `quote!` for code generation
+- Runs at compile time
+- Can generate complete structures
+
+**Further reading:**
+- [Rust Documentation - Procedural Macros](https://doc.rust-lang.org/reference/procedural-macros.html)
+
+</TabItem>
+<TabItem value="scala" label="Scala">
+
+```scala
+import scala.reflect.macros.blackbox.Context
+
+def generateClass(name: String): Any = macro generateClassImpl
+
+def generateClassImpl(c: Context)(name: c.Expr[String]): c.Expr[Any] = {
+  import c.universe._
+  val className = name.tree match {
+    case Literal(Constant(s: String)) => s
+    case _ => "DefaultClass"
+  }
+  c.Expr(q"class $className { def method = 42 }")
+}
+```
+
+**Special features:**
+- Source Code Generation via Macros
+- AST manipulation via `c.universe`
+- Runs at compile time
+- Can generate complete classes
+
+**Further reading:**
+- [Scala Documentation - Macros](https://docs.scala-lang.org/overviews/macros/overview.html)
+
+</TabItem>
+<TabItem value="prolog" label="Prolog">
+
+```prolog
+% Source Code Generation at runtime via assert/retract
+generate_class(ClassName, Methods) :-
+    forall(
+        member(Name, Methods),
+        (   Head =.. [Name, ClassName],
+            assertz(Head)
+        )
+    ).
+
+% Usage
+:- generate_class(my_class, [method1, method2]).
+
+% Query generated predicates
+?- method1(my_class).  % true
+?- method2(my_class).  % true
+
+% Generate and load code from atom
+:- term_to_atom(Rule, 'greet(Name) :- format("Hello, ~w~n", [Name])'),
+   assertz(Rule).
+
+?- greet(alice).  % Hello, alice
+```
+
+**Special features:**
+- Source Code Generation at runtime via `assert/1`, `assertz/1`
+- `=..` (univ) for dynamic term construction
+- `term_to_atom/2` for code generation from strings
+- Prolog is homoiconic — code and data have the same structure
+
+**Further reading:**
+- [SWI-Prolog Documentation - assertz](https://www.swi-prolog.org/pldoc/man?predicate=assertz/1)
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+# Source Code Generation at runtime
+def generate_class(class_name, methods):
+    methods_code = '\n    '.join([f'def {m}(): pass' for m in methods])
+    code = f'''
+class {class_name}:
+    {methods_code}
+'''
+    exec(code, globals())
+    return globals()[class_name]
+
+# Usage
+MyClass = generate_class('MyClass', ['method1', 'method2'])
+obj = MyClass()
+```
+
+**Special features:**
+- Source Code Generation at runtime via `exec()`
+- Very flexible, but less secure
+- Can dynamically generate classes
+- Less structured than compile-time generation
+
+**Further reading:**
+- [Python Documentation - exec](https://docs.python.org/3/library/functions.html#exec)
+
+</TabItem>
+<TabItem value="ruby" label="Ruby">
+
+```ruby
+# Source Code Generation at runtime
+def generate_class(class_name, methods)
+  methods_code = methods.map { |m| "def #{m}; end" }.join("\n  ")
+  code = <<-RUBY
+    class #{class_name}
+      #{methods_code}
+    end
+  RUBY
+  eval(code)
+  Object.const_get(class_name)
+end
+
+# Usage
+MyClass = generate_class('MyClass', [:method1, :method2])
+obj = MyClass.new
+```
+
+**Special features:**
+- Source Code Generation at runtime via `eval()`
+- Very flexible, but less secure
+- Can dynamically generate classes
+- Less structured than compile-time generation
+
+**Further reading:**
+- [Ruby Documentation - eval](https://ruby-doc.org/core-3.1.0/Kernel.html#method-i-eval)
+
+</TabItem>
+<TabItem value="javascript" label="JavaScript">
+
+```javascript
+// Source Code Generation at runtime
+function generateClass(className, methods) {
+    const methodsCode = methods.map(m => `    ${m}() { }`).join('\n');
+    const code = `
+        class ${className} {
+${methodsCode}
+        }
+    `;
+    return eval(`(${code})`);
+}
+
+// Usage
+const MyClass = generateClass('MyClass', ['method1', 'method2']);
+const obj = new MyClass();
+```
+
+**Special features:**
+- Source Code Generation at runtime via `eval()`
+- Very flexible, but less secure
+- Can dynamically generate classes
+- Less structured than compile-time generation
+
+**Further reading:**
+- [MDN Web Docs - eval](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval)
+
+</TabItem>
+<TabItem value="d" label="D">
+
+```d
+// Source Code Generation (String Mixins)
+// Required: import std.stdio;
+
+// String Mixin: Insert code as string at compile time
+mixin("int x = 42;");
+writeln(x);  // 42
+
+// Generate generic getters/setters
+string generateProperty(string type, string name) {
+    return "private " ~ type ~ " _" ~ name ~ ";" ~
+           "@property " ~ type ~ " " ~ name ~ "() { return _" ~ name ~ "; }" ~
+           "@property void " ~ name ~ "(" ~ type ~ " val) { _" ~ name ~ " = val; }";
+}
+
+class Config {
+    mixin(generateProperty("string", "host"));
+    mixin(generateProperty("int", "port"));
+}
+
+auto cfg = new Config();
+cfg.host = "localhost";
+cfg.port = 8080;
+```
+
+**Special features:**
+- `mixin("code")` inserts code as string at compile time
+- String Mixins enable arbitrary code generation
+- CTFE (Compile-Time Function Evaluation) for dynamic code generation
+- More powerful than macros, as arbitrary D code can be generated
+
+**Further reading:**
+- [D Language Specification - String Mixins](https://dlang.org/spec/expression.html#mixin_expressions)
+
+</TabItem>
+
+</Tabs>
+
+
+## 16.3.2. AST Manipulation
+
+Enables inspection, transformation, or generation of a program's Abstract Syntax Tree (AST) at runtime or compile time.
+
+### Languages {#sprachen}
+
+<Tabs availableTabs={['clojure', 'common-lisp', 'groovy', 'javascript', 'julia', 'lean4', 'prolog', 'python', 'racket', 'rust', 'scala', 'typescript', 'wolfram-language']}>
+<TabItem value="prolog" label="Prolog">
+
+```prolog
+% AST manipulation — Terms are the AST (Homoiconicity)
+Expr = (1 + 2 * 3),
+
+% Term decomposition with =.. (univ)
+Expr =.. [Op | Args],
+% Op = +, Args = [1, 2*3]
+
+% Term information
+functor(person(alice, 30), Name, Arity),
+% Name = person, Arity = 2
+
+arg(1, person(alice, 30), First),
+% First = alice
+
+% AST transformation: replace + with *
+transform(X + Y, Result) :- !,
+    transform(X, TX),
+    transform(Y, TY),
+    Result = TX * TY.
+transform(Term, Transformed) :-
+    compound(Term), !,
+    Term =.. [F | Args],
+    maplist(transform, Args, NewArgs),
+    Transformed =.. [F | NewArgs].
+transform(X, X).
+
+?- transform(1 + 2, Result).
+% Result = 1 * 2
+```
+
+**Special features:**
+- Prolog is homoiconic — code and data are terms
+- `=..` (univ) decomposes terms into functor and arguments
+- `functor/3` and `arg/3` for term inspection
+- `maplist/3` for recursive AST traversal
+
+**Further reading:**
+- [SWI-Prolog Documentation - Examining Terms](https://www.swi-prolog.org/pldoc/man?section=manipterm)
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+# Required: import ast
+
+# AST creation
+tree = ast.parse("""
+def add(a, b):
+    return a + b
+""")
+
+# AST inspection
+for node in ast.walk(tree):
+    if isinstance(node, ast.FunctionDef):
+        print(f"Function: {node.name}")
+
+# AST transformation
+class AddOne(ast.NodeTransformer):
+    def visit_BinOp(self, node):
+        if isinstance(node.op, ast.Add):
+            return ast.BinOp(left=node.left, op=ast.Mult(), right=node.right)
+        return node
+
+transformer = AddOne()
+new_tree = transformer.visit(tree)
+```
+
+**Special features:**
+- AST manipulation via `ast` module
+- `ast.parse()` for AST creation
+- `ast.NodeTransformer` for AST transformation
+- `ast.walk()` for AST traversal
+
+**Further reading:**
+- [Python Documentation - ast](https://docs.python.org/3/library/ast.html)
+
+</TabItem>
+<TabItem value="javascript" label="JavaScript">
+
+```javascript
+// Required: import * as babel from '@babel/core', import * as parser from '@babel/parser', import traverse from '@babel/traverse', import generate from '@babel/generator'
+
+// AST creation
+const code = 'function add(a, b) { return a + b; }';
+const ast = parser.parse(code);
+
+// AST inspection
+traverse(ast, {
+    FunctionDeclaration(path) {
+        console.log('Function:', path.node.id.name);
+    }
+});
+
+// AST transformation
+traverse(ast, {
+    BinaryExpression(path) {
+        if (path.node.operator === '+') {
+            path.node.operator = '*';
+        }
+    }
+});
+
+// Code generation
+const output = generate(ast);
+```
+
+**Special features:**
+- AST manipulation via Babel
+- `@babel/parser` for AST creation
+- `@babel/traverse` for AST traversal
+- `@babel/generator` for code generation
+
+**Further reading:**
+- [Babel Documentation](https://babeljs.io/docs/en/)
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript
+// Required: import * as ts from 'typescript'
+
+// AST creation
+const sourceCode = 'function add(a: number, b: number): number { return a + b; }';
+const sourceFile = ts.createSourceFile(
+    'test.ts',
+    sourceCode,
+    ts.ScriptTarget.Latest,
+    true
+);
+
+// AST inspection
+function visit(node: ts.Node) {
+    if (ts.isFunctionDeclaration(node)) {
+        console.log('Function:', node.name?.text);
+    }
+    ts.forEachChild(node, visit);
+}
+
+visit(sourceFile);
+
+// AST transformation
+const transformer: ts.TransformerFactory<ts.SourceFile> = (context) => {
+    return (sourceFile) => {
+        const visitor = (node: ts.Node): ts.Node => {
+            if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+                return ts.factory.createBinaryExpression(
+                    node.left,
+                    ts.SyntaxKind.AsteriskToken,
+                    node.right
+                );
+            }
+            return ts.visitEachChild(node, visitor, context);
+        };
+        return ts.visitNode(sourceFile, visitor) as ts.SourceFile;
+    };
+};
+```
+
+**Special features:**
+- AST manipulation via TypeScript Compiler API
+- `ts.createSourceFile()` for AST creation
+- `ts.visitNode()` for AST traversal
+- `ts.factory` for AST generation
+
+**Further reading:**
+- [TypeScript Documentation - Compiler API](https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API)
+
+</TabItem>
+<TabItem value="rust" label="Rust">
+
+```rust
+// Required: use syn::{parse_macro_input, DeriveInput, Data}, use quote::quote, use proc_macro::TokenStream
+
+#[proc_macro_derive(MyDerive)]
+pub fn my_derive(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    
+    // AST inspection
+    let name = &input.ident;
+    let data = &input.data;
+    
+    // AST transformation
+    let expanded = match data {
+        Data::Struct(_) => {
+            quote! {
+                impl #name {
+                    fn new() -> Self {
+                        // Generated code
+                    }
+                }
+            }
+        },
+        _ => quote! {},
+    };
+    
+    TokenStream::from(expanded)
+}
+```
+
+**Special features:**
+- AST manipulation via `syn` and `quote`
+- `syn` for AST parsing
+- `quote!` for code generation
+- Procedural Macros for AST transformation
+
+**Further reading:**
+- [Rust Documentation - Procedural Macros](https://doc.rust-lang.org/reference/procedural-macros.html)
+
+</TabItem>
+<TabItem value="scala" label="Scala">
+
+```scala
+// Required: import scala.reflect.macros.blackbox.Context, import scala.reflect.runtime.universe._
+
+def transformAST(c: Context)(tree: c.Tree): c.Tree = {
+  import c.universe._
+  
+  // AST inspection
+  val transformed = new Transformer {
+    override def transform(tree: Tree): Tree = {
+      tree match {
+        case Apply(Select(lhs, TermName("+")), List(rhs)) =>
+          Apply(Select(lhs, TermName("*")), List(rhs))
+        case _ =>
+          super.transform(tree)
+      }
+    }
+  }
+  
+  transformed.transform(tree)
+}
+```
+
+**Special features:**
+- AST manipulation via `c.universe`
+- `Transformer` for AST transformation
+- Pattern matching for AST nodes
+- Very powerful AST system
+
+**Further reading:**
+- [Scala Documentation - Macros](https://docs.scala-lang.org/overviews/macros/overview.html)
+
+</TabItem>
+<TabItem value="clojure" label="Clojure">
+
+```clojure
+;; AST manipulation via macros
+(defmacro transform-code [form]
+  (let [transformed (walk/postwalk
+                      (fn [node]
+                        (if (and (list? node) (= (first node) '+))
+                          (list '* (second node) (nth node 2))
+                          node))
+                      form)]
+    transformed))
+
+;; Usage
+(transform-code (+ 5 3))  ; (* 5 3)
+```
+
+**Special features:**
+- AST manipulation via macros
+- `walk/postwalk` for AST traversal
+- Code is data (Homoiconicity)
+- Very powerful AST system
+
+**Further reading:**
+- [Clojure Documentation - Macros](https://clojure.org/reference/macros)
+
+</TabItem>
+<TabItem value="common-lisp" label="Common Lisp">
+
+```lisp
+;; AST manipulation via macros
+(defmacro transform-code (form)
+  (labels ((transform (node)
+             (cond
+               ((and (listp node) (eq (car node) '+))
+                (list '* (cadr node) (caddr node)))
+               ((listp node)
+                (mapcar #'transform node))
+               (t node))))
+    (transform form)))
+
+;; Usage
+(transform-code (+ 5 3))  ; (* 5 3)
+```
+
+**Special features:**
+- AST manipulation via macros
+- Code is data (Homoiconicity)
+- Recursive transformation possible
+- Very powerful AST system
+
+**Further reading:**
+- [Common Lisp HyperSpec - Macros](http://www.lispworks.com/documentation/HyperSpec/Body/03_ababa.htm)
+
+</TabItem>
+<TabItem value="racket" label="Racket">
+
+```racket
+;; AST manipulation via Syntax Objects
+(define-syntax (transform-code stx)
+  (syntax-case stx ()
+    [(_ form)
+     (let ([transformed (syntax->datum #'form)])
+       (datum->syntax stx
+         (walk (lambda (node)
+                 (if (and (list? node) (eq? (car node) '+))
+                     (list '* (cadr node) (caddr node))
+                     node))
+               transformed)))]))
+
+;; Usage
+(transform-code (+ 5 3))  ; (* 5 3)
+```
+
+**Special features:**
+- AST manipulation via Syntax Objects
+- `syntax->datum` and `datum->syntax` for conversion
+- Hygienic Macros
+- Very powerful AST system
+
+**Further reading:**
+- [Racket Documentation - Macros](https://docs.racket-lang.org/guide/macros.html)
+
+</TabItem>
+<TabItem value="groovy" label="Groovy">
+
+```groovy
+import groovy.transform.*
+
+// Built-in AST transformations
+@Immutable
+class Point {
+    int x, y
+}
+
+@Singleton
+class Registry {
+    List<String> items = []
+}
+
+@Sortable
+class Student {
+    String name
+    int grade
+}
+
+// Usage
+def p = new Point(1, 2)
+Registry.instance.items << "test"
+```
+
+**Special features:**
+- Extensive built-in AST transformations (`@Immutable`, `@Singleton`, `@Sortable`, `@Builder`, etc.)
+- Custom AST transformations possible via `ASTTransformation` interface
+- Manipulation of the Abstract Syntax Tree at compile time
+- Local (`@AnnotationName`) and global transformations
+
+**Further reading:**
+- [Groovy Documentation - AST Transformations](https://groovy-lang.org/metaprogramming.html#_compile_time_metaprogramming)
+
+</TabItem>
+<TabItem value="julia" label="Julia">
+
+```julia
+# AST as Expr objects
+expr = :(1 + 2 * 3)
+println(typeof(expr))  # Expr
+println(expr.head)     # :call
+println(expr.args)     # [:+, 1, :(2 * 3)]
+
+# Manipulate AST
+expr.args[2] = 10
+eval(expr)  # 10 + 2 * 3 = 16
+
+# Create AST programmatically
+new_expr = Expr(:call, :+, 1, 2, 3)
+eval(new_expr)  # 6
+
+# Quoting and interpolation
+x = 42
+expr = :($x + 1)
+eval(expr)  # 43
+```
+
+**Special features:**
+- `:(...)` for quoting expressions as Expr objects
+- `Expr` objects have `head` and `args` fields
+- `eval()` for evaluating Expr objects
+- `$` for interpolation in quoted expressions
+- Basis for Julia's macro system
+
+**Further reading:**
+- [Julia Documentation - Metaprogramming](https://docs.julialang.org/en/v1/manual/metaprogramming/)
+
+</TabItem>
+<TabItem value="lean4" label="Lean 4">
+
+```lean4
+-- Lean 4 Metaprogramming: Manipulate Syntax objects
+import Lean
+
+open Lean Elab Meta
+
+-- Syntax quotation: `( ... ) creates Syntax objects
+def mkAddExpr (a b : Syntax) : MacroM Syntax :=
+  `($a + $b)
+
+-- Elaboration: Syntax → Expr (Core-AST)
+elab "myAdd " a:term " and " b:term : term => do
+  let aExpr ← elabTerm a none
+  let bExpr ← elabTerm b none
+  mkAppM ``HAdd.hAdd #[aExpr, bExpr]
+
+#eval myAdd 3 and 4  -- 7
+```
+
+**Special features:**
+- Lean 4 provides full AST manipulation via `Syntax` and `Expr` types.
+- Syntax quotation with `` `( ... ) `` creates and deconstructs AST nodes.
+- `elab` commands enable custom elaboration from syntax to core expressions.
+- The metaprogramming framework is written in Lean 4 itself.
+
+**Further reading:**
+- [Lean 4 Documentation - Metaprogramming](https://lean-lang.org/lean4/doc/metaprogramming.html)
+- [Lean 4 Metaprogramming Book](https://leanprover-community.github.io/lean4-metaprogramming-book/)
+
+</TabItem>
+<TabItem value="wolfram-language" label="Wolfram Language">
+
+```mathematica
+(* AST Manipulation - Expressions are data *)
+expr = Hold[1 + 2 * 3];
+TreeForm[expr]  (* Shows the expression tree *)
+
+(* Manipulation *)
+transformed = expr /. Times -> Plus
+(* Hold[1 + 2 + 3] *)
+```
+
+**Special features:**
+- Wolfram Language is homoiconic: code and data have the same structure
+- `Hold[]` prevents evaluation for AST manipulation
+- `TreeForm[]` visualizes the expression tree
+- Transformation rules (`/.`) for AST manipulation
+
+**Further reading:**
+- [Wolfram Language Documentation - Expression Manipulation](https://reference.wolfram.com/language/guide/ExpressionManipulation.html)
+
+</TabItem>
+</Tabs>
+
+
+## 16.3.3. Language-Oriented Programming
+
+Enables creation and use of domain-specific languages (DSLs) that are specifically designed for particular problem domains to make code more readable and expressive.
+
+### Languages {#sprachen}
+
+<Tabs availableTabs={['ruby', 'python', 'prolog', 'scala', 'clojure', 'common-lisp', 'racket', 'rust', 'haskell', 'lean4', 'fsharp', 'kotlin']} yellowTabs={['mercury']}>
+<TabItem value="ruby" label="Ruby">
+
+```ruby
+# DSL for configuration
+class ConfigDSL
+  def self.configure(&block)
+    config = new
+    config.instance_eval(&block)
+    config
+  end
+  
+  def database(name)
+    @database = name
+  end
+  
+  def port(num)
+    @port = num
+  end
+end
+
+# Using the DSL
+config = ConfigDSL.configure do
+  database "postgresql"
+  port 5432
+end
+```
+
+**Special features:**
+- DSL creation via metaprogramming
+- `instance_eval` for DSL context
+- Very flexible and expressive
+- Frequently used for configuration and testing
+
+**Further reading:**
+- [Ruby Documentation - Metaprogramming](https://ruby-doc.org/core-3.1.0/doc/syntax/methods_rdoc.html)
+
+</TabItem>
+<TabItem value="prolog" label="Prolog">
+
+```prolog
+% DSL via Definite Clause Grammars (DCGs)
+config_entry(database(DB)) --> [database], [DB].
+config_entry(port(Port))   --> [port], [Port].
+
+config([E|Es]) --> config_entry(E), config(Es).
+config([])     --> [].
+
+% Using the DSL
+?- phrase(config(Config), [database, postgresql, port, 5432]).
+% Config = [database(postgresql), port(5432)]
+
+% DSL via custom operators
+:- op(700, xfx, =>).
+:- dynamic setting/2.
+
+Key => Value :- assertz(setting(Key, Value)).
+
+:- database => postgresql.
+:- port => 5432.
+
+?- setting(database, DB).  % DB = postgresql
+?- setting(port, P).       % P = 5432
+```
+
+**Special features:**
+- DSL creation via Definite Clause Grammars (DCGs)
+- Custom operators via `op/3`
+- `term_expansion/2` for syntactic transformation
+- Declarative nature makes Prolog ideal for DSL creation
+
+**Further reading:**
+- [SWI-Prolog Documentation - DCGs](https://www.swi-prolog.org/pldoc/man?section=DCG)
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+# DSL for configuration
+class ConfigDSL:
+    def __init__(self):
+        self._config = {}
+    
+    def database(self, name):
+        self._config['database'] = name
+        return self
+    
+    def port(self, num):
+        self._config['port'] = num
+        return self
+
+# Using the DSL
+config = ConfigDSL()
+config.database("postgresql").port(5432)
+```
+
+**Special features:**
+- DSL creation via method chaining
+- Less flexible than Ruby
+- Frequently used for configuration
+- Flask, Django use DSL patterns
+
+**Further reading:**
+- [Python Documentation - Classes](https://docs.python.org/3/tutorial/classes.html)
+
+</TabItem>
+<TabItem value="scala" label="Scala">
+
+```scala
+// DSL for build configuration
+class BuildDSL {
+  def project(name: String)(block: => Unit): Unit = {
+    println(s"Project: $name")
+    block
+  }
+  
+  def dependencies(deps: String*): Unit = {
+    println(s"Dependencies: ${deps.mkString(", ")}")
+  }
+}
+
+// Using the DSL
+val build = new BuildDSL
+build.project("my-project") {
+  build.dependencies("scala-library", "junit")
+}
+```
+
+**Special features:**
+- DSL creation via methods with block parameters
+- Very expressive
+- Frequently used for build tools (SBT)
+- Supports complex DSL structures
+
+**Further reading:**
+- [Scala Documentation - DSLs](https://docs.scala-lang.org/overviews/core/implicit-classes.html)
+
+</TabItem>
+<TabItem value="clojure" label="Clojure">
+
+```clojure
+;; DSL for database queries
+(defmacro select [table & conditions]
+  `(query ~table ~@conditions))
+
+(defmacro where [condition]
+  `(filter ~condition))
+
+;; Using the DSL
+(select :users
+  (where (> :age 18))
+  (where (= :status "active")))
+```
+
+**Special features:**
+- DSL creation via macros
+- Code is data (Homoiconicity)
+- Very powerful and flexible
+- Frequently used for database queries
+
+**Further reading:**
+- [Clojure Documentation - Macros](https://clojure.org/reference/macros)
+
+</TabItem>
+<TabItem value="common-lisp" label="Common Lisp">
+
+```lisp
+;; DSL for HTML generation
+(defmacro html (&body body)
+  `(progn ,@body))
+
+(defmacro tag (name &body body)
+  `(format t "<~a>~{~a~}</~a>~%" ,name (list ,@body)))
+
+;; Using the DSL
+(html
+  (tag :div
+    (tag :h1 "Hello")
+    (tag :p "World")))
+```
+
+**Special features:**
+- DSL creation via macros
+- Code is data (Homoiconicity)
+- Very powerful and flexible
+- Frequently used for HTML generation
+
+**Further reading:**
+- [Common Lisp HyperSpec - Macros](http://www.lispworks.com/documentation/HyperSpec/Body/03_ababa.htm)
+
+</TabItem>
+<TabItem value="racket" label="Racket">
+
+```racket
+;; DSL for web development
+(define-syntax html
+  (syntax-rules ()
+    [(_ body ...)
+     (list body ...)]))
+
+(define-syntax tag
+  (syntax-rules ()
+    [(_ name body ...)
+     (list 'name body ...)]))
+
+;; Using the DSL
+(html
+  (tag div
+    (tag h1 "Hello")
+    (tag p "World")))
+```
+
+**Special features:**
+- DSL creation via Hygienic Macros
+- Very powerful and flexible
+- Frequently used for web development
+- Supports complex DSL structures
+
+**Further reading:**
+- [Racket Documentation - Macros](https://docs.racket-lang.org/guide/macros.html)
+
+</TabItem>
+<TabItem value="rust" label="Rust">
+
+```rust
+// DSL for SQL queries
+macro_rules! sql {
+    (SELECT $($field:ident),* FROM $table:ident WHERE $condition:expr) => {
+        // SQL query generation
+        format!("SELECT {} FROM {} WHERE {}", 
+            stringify!($($field),*), 
+            stringify!($table), 
+            stringify!($condition))
+    };
+}
+
+// Using the DSL
+let query = sql!(SELECT id, name FROM users WHERE age > 18);
+```
+
+**Special features:**
+- DSL creation via Declarative Macros
+- Pattern matching for DSL syntax
+- Less flexible than Lisp macros
+- Frequently used for SQL queries
+
+**Further reading:**
+- [Rust Documentation - Macros](https://doc.rust-lang.org/book/ch19-06-macros.html)
+
+</TabItem>
+<TabItem value="haskell" label="Haskell">
+
+```haskell
+-- Required: import Text.Parsec
+
+-- Parser DSL
+numberParser :: Parsec String () Int
+numberParser = do
+    digits <- many1 digit
+    return (read digits)
+
+-- Using the DSL
+parse numberParser "" "123"  -- Right 123
+```
+
+**Special features:**
+- DSL creation via monads
+- Very expressive
+- Frequently used for parsing
+- Supports complex DSL structures
+
+**Further reading:**
+- [Haskell Documentation - Parsec](https://hackage.haskell.org/package/parsec)
+
+</TabItem>
+<TabItem value="lean4" label="Lean 4">
+
+```lean4
+-- DSL via custom syntax (Notation + Macro)
+import Lean
+
+-- Custom notation for an HTML DSL
+declare_syntax_cat html
+syntax str : html
+syntax "<div>" html* "</div>" : html
+syntax "<p>" html* "</p>" : html
+
+-- Macro that translates HTML DSL to string
+macro_rules
+  | `(html| $s:str) => `($s)
+  | `(html| <div> $children:html* </div>) =>
+    let strs := children.map fun c => `(html| $c)
+    `("<div>" ++ String.join ([$[$strs],*]) ++ "</div>")
+
+-- Custom notation for mathematics
+notation:65 a " ≤ " b " ≤ " c => a ≤ b ∧ b ≤ c
+```
+
+**Special features:**
+- Lean 4 supports Language-Oriented Programming through custom syntax categories and macros.
+- `declare_syntax_cat` creates new syntax categories.
+- `syntax` defines parsing rules, `macro_rules` defines the transformation.
+- `notation` and `infix` enable domain-specific operators.
+
+**Further reading:**
+- [Lean 4 Documentation - Metaprogramming](https://lean-lang.org/lean4/doc/metaprogramming.html)
+- [Lean 4 Metaprogramming Book](https://leanprover-community.github.io/lean4-metaprogramming-book/)
+
+</TabItem>
+<TabItem value="fsharp" label="F#">
+
+```fsharp
+// DSL for HTML generation
+type Html = 
+    | Tag of string * Html list
+    | Text of string
+
+let div content = Tag("div", content)
+let h1 text = Tag("h1", [Text text])
+let p text = Tag("p", [Text text])
+
+// Using the DSL
+let html = div [
+    h1 "Hello"
+    p "World"
+]
+```
+
+**Special features:**
+- DSL creation via Discriminated Unions
+- Very expressive
+- Frequently used for HTML generation
+- Supports complex DSL structures
+
+**Further reading:**
+- [F# Documentation - Discriminated Unions](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/discriminated-unions)
+
+</TabItem>
+<TabItem value="kotlin" label="Kotlin">
+
+```kotlin
+// DSL for HTML generation
+class Html {
+    fun div(block: Html.() -> Unit) {
+        println("<div>")
+        block()
+        println("</div>")
+    }
+    
+    fun h1(text: String) {
+        println("<h1>$text</h1>")
+    }
+    
+    fun p(text: String) {
+        println("<p>$text</p>")
+    }
+}
+
+// Using the DSL
+html {
+    div {
+        h1("Hello")
+        p("World")
+    }
+}
+```
+
+**Special features:**
+- DSL creation via lambda with receiver
+- Very expressive
+- Frequently used for HTML generation
+- Supports complex DSL structures
+
+**Further reading:**
+- [Kotlin Documentation - DSLs](https://kotlinlang.org/docs/type-safe-builders.html)
+
+</TabItem>
+<TabItem value="mercury" label="Mercury">
+
+```prolog
+% DSL via Definite Clause Grammars (DCGs)
+:- type config_item
+    --->    database(string)
+    ;       port(string).
+
+:- pred config_entry(config_item::out,
+    list(string)::in, list(string)::out) is semidet.
+config_entry(database(DB)) --> ["database"], [DB].
+config_entry(port(P))      --> ["port"], [P].
+
+:- pred config(list(config_item)::out,
+    list(string)::in, list(string)::out) is semidet.
+config([E|Es]) --> config_entry(E), config(Es).
+config([])     --> [].
+
+% Using the DSL
+main(!IO) :-
+    Input = ["database", "postgresql", "port", "5432"],
+    ( if config(Config, Input, []) then
+        io.print_line(Config, !IO)
+        % [database("postgresql"), port("5432")]
+    else
+        io.write_string("Parse failed\n", !IO)
+    ).
+```
+
+**Special features:**
+- DSL creation via Definite Clause Grammars (DCGs)
+- `-->` notation for type-safe and mode-checked grammar rules
+- DCGs transform lists — type-safe and deterministically checked
+- No dynamic operators or macros — primarily parsing-based DSLs
+
+**Further reading:**
+- [Mercury Language Reference - DCG Rules](https://www.mercurylang.org/information/doc-release/mercury_ref/DCG-rules.html)
+
+</TabItem>
+</Tabs>
+

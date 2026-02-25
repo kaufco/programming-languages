@@ -1,0 +1,15 @@
+/**
+ * Swizzled styles – identisch mit dem Original.
+ */
+@media (min-width: 997px) {
+  /* Auf Desktop ist die mobile TOC ausgeblendet */
+  .tocMobile {
+    display: none;
+  }
+}
+
+@media print {
+  .tocMobile {
+    display: none;
+  }
+}

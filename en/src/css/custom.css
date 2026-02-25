@@ -1,0 +1,131 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #2e8555;
+  --ifm-color-primary-dark: #29784c;
+  --ifm-color-primary-darker: #277148;
+  --ifm-color-primary-darkest: #205d3b;
+  --ifm-color-primary-light: #33925d;
+  --ifm-color-primary-lighter: #359962;
+  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Hide TOC on pages with toc: false in frontmatter */
+/* Since toc: false doesn't work reliably in Docusaurus, we use CSS to hide TOC on specific pages */
+/* Start page and topic area pages */
+article[itemprop="articleBody"]:has(+ aside .table-of-contents:empty),
+main[class*="docMainContainer"]:has(.card) .table-of-contents {
+  display: none !important;
+}
+
+/* Alternative: Hide TOC on pages that have cards (start page and topic area pages) */
+.doc-wrapper:has(.card) aside .table-of-contents,
+.doc-wrapper:has(.card) .table-of-contents {
+  display: none !important;
+}
+
+/* Tabs umbrechen lassen statt Scrollbar */
+.tabs {
+  flex-wrap: wrap !important;
+  overflow: visible !important;
+}
+
+.tabs__list {
+  flex-wrap: wrap !important;
+  overflow: visible !important;
+  border-bottom: 1px solid var(--ifm-tabs-color-border);
+  padding: 0 10px !important;
+}
+
+.tabs__item {
+  flex-shrink: 0;
+  padding: 0 10px !important;
+}
+
+/* Navbar Layout - sicherstellen, dass alle Komponenten sichtbar sind */
+.navbar__items {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Filter-Komponente sollte nach dem Logo erscheinen */
+.navbar__items--left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Navbar soll ihre Höhe anpassen, wenn Filter-Komponente umbricht */
+.navbar__inner {
+  min-height: auto;
+  align-items: flex-start;
+  overflow: visible;
+}
+
+.navbar {
+  overflow: visible;
+  min-height: auto;
+  height: auto;
+}
+
+/* Navbar soll ihre Höhe dynamisch anpassen */
+.navbar--fixed-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--ifm-z-index-fixed);
+}
+
+/* Content-Bereich soll genug Platz für die dynamische Navbar-Höhe haben */
+.main-wrapper {
+  padding-top: calc(var(--ifm-navbar-height, 3.75rem) + 2rem);
+  transition: padding-top 0.2s ease;
+}
+
+/* Dark Mode Toggle am rechten Rand positionieren */
+.navbar__items--right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Suchfeld sollte sichtbar sein */
+.navbar__search {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Sicherstellen, dass der Titel nicht verdrängt wird und vertikal zentriert ist */
+.navbar__brand {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+

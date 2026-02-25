@@ -1,0 +1,322 @@
+/* ================================================================
+   FeatureMatrix – Tabelle in festem Scroll-Container (Panelhöhe).
+   Sticky: Header-Zeile (top), Feature-Spalte (left).
+
+   ⚠ Infima (Docusaurus CSS) setzt global:
+     table        { display: block; overflow: auto; border-collapse: collapse }
+     table th/td  { border: …; padding: … }
+     table tr     { background-color: …; border-top: … }
+     table thead  { background-color: … }
+   Alle diese MÜSSEN hier überschrieben werden.
+   Wir verwenden hohe Specificity (.table thead .xxx / .table tbody .xxx)
+   um sicher gegen Infima (tag-only Selektoren) zu gewinnen.
+   ================================================================ */
+
+/* ── Scroll-Container: volle Panelhöhe, h+v Scrollbars ── */
+.scrollArea {
+  overflow: auto;
+  max-height: calc(80vh - var(--ifm-navbar-height, 3.75rem));
+  margin-top: 1rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: var(--ifm-global-radius);
+  isolation: isolate;
+}
+
+/* ── Tabelle: Infima-Resets ── */
+.table {
+  display: table;
+  overflow: visible;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+  line-height: 1.15;
+  table-layout: auto;
+  margin-bottom: 0;
+}
+
+/* Infima-Resets auf Tabellenelemente (muss alles weg) */
+.table thead       { background-color: transparent; }
+.table thead tr     { border-bottom: none; background-color: transparent; }
+.table tbody tr     { border-top: none; }
+.table tr:nth-child(2n) { background-color: transparent; }
+.table th,
+.table td           { border: none; padding: 0; }
+
+/* ====================================================================
+   HEADER-ZEILE (sticky top)
+   ==================================================================== */
+
+/* Alle Header-Zellen: sticky top */
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--ifm-color-emphasis-100);
+  padding: 0.25rem 0.3rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  vertical-align: middle;
+  color: var(--ifm-color-emphasis-700);
+  letter-spacing: 0.01em;
+  border-bottom: 2px solid var(--ifm-color-emphasis-300);
+}
+
+[data-theme='dark'] .table thead th {
+  background: var(--ifm-color-emphasis-100);
+}
+
+/* Feature-Header (oben links): sticky top + left
+   Specificity: .table (class) + thead (el) + .featureHeader (class) = 0-2-1
+   → gewinnt sicher gegen .table thead th (0-1-2)  */
+.table thead .featureHeader {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  text-align: left;
+  width: 320px;
+  min-width: 280px;
+  padding: 0;
+  background: var(--ifm-color-emphasis-100);
+  box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.featureHeaderInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Sprach-Header */
+.langHeader {
+  min-width: 48px;
+  max-width: 68px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ====================================================================
+   BODY-ZEILEN
+   ==================================================================== */
+
+.table tbody tr {
+  background: var(--ifm-background-color);
+}
+
+/* Feature-Zelle (linke Spalte): sticky left
+   Specificity: .table (class) + tbody (el) + .featureCell (class) = 0-2-1
+   → gewinnt gegen .table td (0-1-1)  */
+.table tbody .featureCell {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  padding: 0.2rem 0.5rem;
+  background: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 320px;
+  min-width: 280px;
+  max-width: 320px;
+  border: none;
+  box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.1);
+  /* Eigener Compositing-Layer → Hintergrund wird ÜBER Farbzellen gezeichnet */
+  will-change: left;
+}
+
+[data-theme='dark'] .table tbody .featureCell {
+  box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.4);
+}
+
+.table tbody tr:hover .featureCell {
+  background: #f0f0f0;
+}
+
+[data-theme='dark'] .table tbody .featureCell,
+[data-theme='dark'] .table tbody .level1 .featureCell,
+[data-theme='dark'] .table tbody .level2 .featureCell,
+[data-theme='dark'] .table tbody .level3 .featureCell {
+  background: #1b1b1d;
+}
+
+[data-theme='dark'] .table tbody tr:hover .featureCell {
+  background: #2a2a2d;
+}
+
+/* ── Level-Styling (jeder Level bekommt expliziten opaken Hintergrund) ── */
+.table tbody .level1 .featureCell {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ifm-font-color-base);
+  background: #ffffff;
+}
+
+.table tbody .level2 .featureCell {
+  font-weight: 600;
+  padding-left: calc(0.5rem + 8px);
+  color: var(--ifm-font-color-base);
+  background: #ffffff;
+}
+
+.table tbody .level3 .featureCell {
+  font-weight: 400;
+  padding-left: calc(0.5rem + 16px);
+  color: var(--ifm-color-emphasis-800);
+  background: #ffffff;
+}
+
+/* ====================================================================
+   INTERAKTIVE ELEMENTE
+   ==================================================================== */
+
+/* Expand/Collapse-Chevron (Zeilen) */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.4rem;
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  background: none;
+  padding: 0;
+  border-radius: var(--ifm-global-radius);
+  transition: background 0.15s, color 0.15s;
+  vertical-align: middle;
+  color: var(--ifm-color-emphasis-500);
+}
+
+.toggle:hover {
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-primary);
+}
+
+.toggleIcon {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent currentColor;
+  transition: transform 0.2s ease;
+}
+
+.toggleExpanded .toggleIcon {
+  transform: rotate(90deg);
+}
+
+.toggleSpacer {
+  display: inline-block;
+  width: 1.65rem;
+}
+
+/* Expand/Collapse-Icon im Header */
+.headerToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  background: none;
+  padding: 0;
+  border-radius: var(--ifm-global-radius);
+  transition: background 0.15s, color 0.15s;
+  color: var(--ifm-color-emphasis-500);
+  flex-shrink: 0;
+}
+
+.headerToggle:hover {
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-primary);
+}
+
+.headerToggleIcon {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 5px 0 5px 7px;
+  border-color: transparent transparent transparent currentColor;
+  transition: transform 0.2s ease;
+}
+
+.headerToggleExpanded .headerToggleIcon {
+  transform: rotate(90deg);
+}
+
+/* Feature-Link */
+.featureLink {
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+  vertical-align: middle;
+  transition: color 0.15s;
+}
+
+.featureLink:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+/* ====================================================================
+   FARBZELLEN
+   ==================================================================== */
+
+.table tbody .colorCell {
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Feature-Zeilen (Level 3): helle Hintergrundfarben */
+.cellGreen  { background: #d4edda; }
+.cellYellow { background: #fff3cd; }
+.cellOrange { background: #fde8d0; }
+.cellRed    { background: #f8d7da; }
+.cellNull   { background: var(--ifm-color-emphasis-50, rgba(0, 0, 0, 0.02)); }
+
+[data-theme='dark'] .cellGreen  { background: #1e4620; }
+[data-theme='dark'] .cellYellow { background: #463a10; }
+[data-theme='dark'] .cellOrange { background: #4a2e10; }
+[data-theme='dark'] .cellRed    { background: #4a1f23; }
+[data-theme='dark'] .cellNull   { background: rgba(255, 255, 255, 0.02); }
+
+
+/* ====================================================================
+   ZEILEN- UND SPALTEN-HOVER (nur Inhaltszellen)
+   ==================================================================== */
+
+/* Zeilen-Hover: alle Farbzellen in der Zeile abdunkeln */
+.table tbody tr:hover .colorCell {
+  box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.07);
+}
+
+/* Spalten-Hover: per JS-Klasse */
+.colHover {
+  box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.07);
+}
+
+/* Kombination: Zelle in Hover-Zeile UND Hover-Spalte stärker abdunkeln */
+.table tbody tr:hover .colHover {
+  box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.14);
+}
+
+/* Dark Mode: hellere Overlay */
+[data-theme='dark'] .table tbody tr:hover .colorCell {
+  box-shadow: inset 0 0 0 999px rgba(255, 255, 255, 0.06);
+}
+[data-theme='dark'] .colHover {
+  box-shadow: inset 0 0 0 999px rgba(255, 255, 255, 0.06);
+}
+[data-theme='dark'] .table tbody tr:hover .colHover {
+  box-shadow: inset 0 0 0 999px rgba(255, 255, 255, 0.12);
+}

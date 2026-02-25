@@ -1,0 +1,21 @@
+---
+slug: /sprachen/feature-matrix
+title: 1.3. Feature-Matrix
+---
+
+import FeatureMatrix from '@site/src/components/FeatureMatrix';
+
+# 1.3. Feature-Matrix
+
+Welche Sprache unterstützt welches Feature — und in welchem Grad? Diese interaktive Matrix gibt einen kompakten Überblick über den Unterstützungsgrad aller 56 Programmiersprachen für jedes dokumentierte Sprach-Feature.
+
+Jede Zelle ist farbcodiert nach dem gleichen Schema wie die Tabs auf den Feature-Seiten:
+
+- <span style={{color: '#28a745', fontWeight: 600}}>Grün</span>: Natives Sprach-Feature — die Sprache unterstützt dieses Feature direkt und idiomatisch.
+- <span style={{color: '#b8860b', fontWeight: 600}}>Gelb</span>: Eingeschränkt oder per API — das Feature ist verfügbar, aber mit Einschränkungen oder nur über Bibliotheken.
+- <span style={{color: '#e67e22', fontWeight: 600}}>Orange</span>: Nur als Workaround — das Feature wird nicht direkt unterstützt, kann aber umständlich nachgebildet werden.
+- <span style={{color: '#dc3545', fontWeight: 600}}>Rot</span>: Nicht unterstützt — die Sprache bietet dieses Feature nicht an.
+
+**Sprachen auswählen:** Verwende den **Sprachfilter** (🔍) in der Navigationsleiste, um die gewünschten Sprachen als Spalten hinzuzufügen.
+
+<FeatureMatrix />

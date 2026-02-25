@@ -1,0 +1,14 @@
+.tocWithLegend {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height, 3.75rem) + 1rem);
+  max-height: calc(100vh - var(--ifm-navbar-height, 3.75rem) - 2rem);
+  overflow-y: auto;
+}
+
+/* Override the TOC's own sticky positioning since the wrapper handles it */
+.tocWithLegend > div {
+  position: static !important;
+  top: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
