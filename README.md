@@ -1,6 +1,6 @@
 # Programming Languages — Concepts and Features
 
-A comparative documentation that systematically compares 56 programming languages based on their concepts and features. The languages are analyzed across 22 topic areas — from type systems and control flow to OOP and pattern matching, to concurrency, metaprogramming, and memory management.
+A comparative documentation that systematically compares 56 programming languages based on their concepts and features. The languages are analyzed across 19 topic areas — from type systems and control flow to OOP and pattern matching, to concurrency, metaprogramming, and memory management.
 
 The goal is to make visible the fundamental trade-offs and design decisions of modern programming languages: How does Rust achieve memory safety without a garbage collector? What does pattern matching look like in 30 different languages? What distinguishes Kotlin's coroutines from Go's goroutines? Each feature is displayed per language as a tab — with code example and explanation of the specifics.
 
@@ -8,13 +8,17 @@ The documentation is aimed at language designers, educators, and advanced develo
 
 > **Note:** The documentation is available in two languages (German and English). Both versions are standalone Docusaurus installations and can be switched via the language switcher in the navigation bar.
 
+**Live Documentation:**
+- [English Version](https://kaufco.github.io/programming-languages/)
+- [German Version](https://kaufco.github.io/programming-languages/de/)
+
 ## Covered Languages
 
 Ada · C · C# · C++ · Carbon · Clojure · Common Lisp · Crystal · D · Dart · Eiffel · Elixir · Elm · Erlang · F# · Fortran · Gleam · Go · Groovy · Haskell · Haxe · Idris · Java · JavaScript · Julia · Koka · Kotlin · Lean 4 · Lua · MATLAB · Mercury · Mojo · Nim · Objective-C · Object Pascal · OCaml · Octave · Odin · Perl · PHP · Prolog · PureScript · Python · R · Racket · Roc · Ruby · Rust · Scala · Scheme · Swift · TypeScript · V · VB.NET · Wolfram Language · Zig
 
 ## Topic Areas
 
-1. Programming Languages — 2. Type System — 3. Binding & Scoping — 4. Operators — 5. Control Flow — 6. Pattern Matching — 7. Functions — 8. Object Orientation — 9. Collections — 10. Syntax & Structure — 11. Modules & Namespaces — 12. Memory Management — 13. Error Handling — 14. Concurrency — 15. Evaluation & Execution — 16. Metaprogramming — 17. Runtime & Execution — 18. Interoperability — 19. String Processing — 20. Scientific Computing — 21. DSL Support — 22. Specialized Features
+1\. [Programming Languages](https://kaufco.github.io/programming-languages/sprachen) — 2. [Syntax and Structure](https://kaufco.github.io/programming-languages/syntax-struktur) — 3. [Type System](https://kaufco.github.io/programming-languages/typsystem) — 4. [Binding and Scoping](https://kaufco.github.io/programming-languages/binding-scoping) — 5. [Operators](https://kaufco.github.io/programming-languages/operatoren) — 6. [Control Flow](https://kaufco.github.io/programming-languages/kontrollfluss) — 7. [Functions and Procedures](https://kaufco.github.io/programming-languages/funktionen) — 8. [Object-Oriented Programming](https://kaufco.github.io/programming-languages/objektorientierung) — 9. [Functional Programming Concepts](https://kaufco.github.io/programming-languages/fp-konzepte) — 10. [Collections and Data Structures](https://kaufco.github.io/programming-languages/collections) — 11. [String Processing](https://kaufco.github.io/programming-languages/string-verarbeitung) — 12. [Error Handling](https://kaufco.github.io/programming-languages/fehlerbehandlung) — 13. [Memory Management](https://kaufco.github.io/programming-languages/speicherverwaltung) — 14. [Concurrency and Parallelism](https://kaufco.github.io/programming-languages/concurrency) — 15. [Modules and Namespaces](https://kaufco.github.io/programming-languages/module-namespaces) — 16. [Metaprogramming](https://kaufco.github.io/programming-languages/metaprogrammierung) — 17. [Execution Model, Runtime and Interop](https://kaufco.github.io/programming-languages/ausfuehrungsmodell) — 18. [Testing and Assertions](https://kaufco.github.io/programming-languages/testing) — 19. [Specialized Features](https://kaufco.github.io/programming-languages/spezialisierte-features)
 
 ## Tab Color System
 
@@ -85,20 +89,6 @@ The documentation is automatically built and deployed to **GitHub Pages** via **
 - **English:** `https://kaufco.github.io/programming-languages/` (default)
 - **German:** `https://kaufco.github.io/programming-languages/de/`
 
-**Setup (one-time):**
-
-1. In the GitHub repository → **Settings** → **Pages**
-2. Under **Source**: select "**GitHub Actions**" (not "Deploy from a branch")
-3. Done — on the next push to `master`, it will automatically build and deploy.
-
-The workflow can also be triggered manually: **Actions** → **Deploy to GitHub Pages** → **Run workflow**.
-
-**Alternative Hosting:**
-
-The built version (`build/`) is a static website and can also be deployed on other platforms:
-- **Vercel / Netlify / Cloudflare Pages:** Build command `npm run build`, output directory `build/`
-- **Own web server (Nginx, Apache):** Configure `build/` directory as document root
-
 ### Fixing Cache Issues
 
 If changes are not visible after a reload:
@@ -131,10 +121,10 @@ The documentation is set up bilingually (German and English) with two separate D
 │   ├── de/                  # German version
 │   └── (en in root)         # English version
 ├── dev-proxy.js             # Development proxy for both versions
-├── LANGUAGES.md             # List of all covered languages
-├── COLORS.md                # Tab color classifications
-├── TODO.md                  # Open tasks and planned improvements
-└── package.json
+├── LICENSE                  # CC BY-NC-SA 4.0 license
+├── README.md                # This file
+├── start-dev.sh             # Deployment script
+└── TODO.md                  # Open tasks and planned improvements
 ```
 
 ## Technology Stack
